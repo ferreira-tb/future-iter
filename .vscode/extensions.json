@@ -1,0 +1,10 @@
+{
+  "recommendations": [
+    "tamasfe.even-better-toml",
+    "donjayamanne.githistory",
+    "vivaxy.vscode-conventional-commits",
+    "github.vscode-pull-request-github",
+    "rust-lang.rust-analyzer",
+    "vscode-icons-team.vscode-icons"
+  ]
+}
