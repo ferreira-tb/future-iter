@@ -63,10 +63,11 @@ where
   }
 }
 
-impl<F, T> IntoJoinSetBy<F, T> for Vec<T>
+impl<F, T, U> IntoJoinSetBy<F, T> for Vec<U>
 where
   F: Future<Output = T> + Send + 'static,
   T: Send + 'static,
+  U: Send + 'static,
 {
 }
 
@@ -108,6 +109,20 @@ mod tests {
       .into_iter()
       .collect_vec()
       .into_join_set_by(future::ready);
+
+    assert!(set.len() == 10);
+
+    while let Some(result) = set.join_next().await {
+      result.unwrap();
+    }
+  }
+
+  #[tokio::test]
+  async fn into_join_set_by_with_different_type() {
+    let mut set = (0..10)
+      .into_iter()
+      .collect_vec()
+      .into_join_set_by(|it| future::ready(format!("{it}")));
 
     assert!(set.len() == 10);
 
