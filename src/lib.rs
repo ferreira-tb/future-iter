@@ -3,5 +3,5 @@ pub mod join_set;
 
 pub mod prelude {
   #[cfg(feature = "tokio")]
-  pub use crate::join_set::IntoJoinSet as _;
+  pub use crate::join_set::prelude::*;
 }
