@@ -2,7 +2,7 @@ use std::future::Future;
 use tokio::task::JoinSet;
 
 pub mod prelude {
-  pub use super::{IntoJoinSet as _, JoinSetFromIter as _};
+  pub use super::{IntoJoinSet as _, IntoJoinSetBy as _, JoinSetFromIter as _};
 }
 
 pub trait JoinSetFromIter: Iterator {
