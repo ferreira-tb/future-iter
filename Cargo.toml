@@ -31,6 +31,9 @@ optional = true
 default-features = false
 features = ["rt-multi-thread", "macros"]
 
+[dev-dependencies]
+itertools = "0.13.0"
+
 [features]
 default = ["tokio"]
 tokio = ["dep:tokio"]

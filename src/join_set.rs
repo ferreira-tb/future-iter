@@ -39,13 +39,6 @@ where
   fn into_join_set(self) -> JoinSet<T> {
     self.into_iter().join_set()
   }
-
-  fn into_join_set_by<M>(self, f: M) -> JoinSet<T>
-  where
-    M: FnMut(Self::Item) -> F,
-  {
-    self.into_iter().join_set_by(f)
-  }
 }
 
 impl<F, T> IntoJoinSet<F, T> for Vec<F>
@@ -55,14 +48,66 @@ where
 {
 }
 
+pub trait IntoJoinSetBy<F, T>: IntoIterator
+where
+  Self: Sized,
+  <Self as IntoIterator>::Item: Send + 'static,
+  F: Future<Output = T> + Send + 'static,
+  T: Send + 'static,
+{
+  fn into_join_set_by<M>(self, f: M) -> JoinSet<T>
+  where
+    M: FnMut(Self::Item) -> F,
+  {
+    self.into_iter().join_set_by(f)
+  }
+}
+
+impl<F, T> IntoJoinSetBy<F, T> for Vec<T>
+where
+  F: Future<Output = T> + Send + 'static,
+  T: Send + 'static,
+{
+}
+
 #[cfg(test)]
 mod tests {
   use super::*;
+  use itertools::Itertools;
   use std::future;
 
   #[tokio::test]
   async fn join_set_by() {
     let mut set = (0..10).into_iter().join_set_by(future::ready);
+
+    assert!(set.len() == 10);
+
+    while let Some(result) = set.join_next().await {
+      result.unwrap();
+    }
+  }
+
+  #[tokio::test]
+  async fn into_join_set() {
+    let mut set = (0..10)
+      .into_iter()
+      .map(future::ready)
+      .collect_vec()
+      .into_join_set();
+
+    assert!(set.len() == 10);
+
+    while let Some(result) = set.join_next().await {
+      result.unwrap();
+    }
+  }
+
+  #[tokio::test]
+  async fn into_join_set_by() {
+    let mut set = (0..10)
+      .into_iter()
+      .collect_vec()
+      .into_join_set_by(future::ready);
 
     assert!(set.len() == 10);
 
